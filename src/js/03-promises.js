@@ -1,23 +1,31 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-
-const refs = {
-  form: document.querySelector('.form'),
-  delay: document.querySelector('input[name="delay"]'),
-  step: document.querySelector('input[name="step"]'),
-  amount: document.querySelector('input[name="amount"]')
-}
-
-refs.form.addEventListener('submit', onFormSubmit);
+const formEl = document.querySelector('.form');
+  
+formEl.addEventListener('submit', onFormSubmit);
 
 function onFormSubmit(event) {
   event.preventDefault();
-  const data = {
-    delay: parseInt(refs.delay.value),
-    step: parseInt(refs.step.value),
-    amount: parseInt(refs.amount.value)
+  let delay = parseInt(formEl.elements.delay.value);
+  const step = parseInt(formEl.elements.step.value);
+  const amount = parseInt(formEl.elements.amount.value);
+
+  for (let index = 1; index <= amount; index += 1) {
+    if (index !== 1) {
+      delay += step;
+    }
+    
+      createPromise(index, delay)
+      .then(({ position, delay }) => {
+        Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`);
+      })
+      .catch(({ position, delay }) => {
+        Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`);
+      });
+    
   };
-  callPromiseCreation(data);
+  
+  formEl.reset();
 }
 
 function createPromise(position, delay) {
@@ -32,18 +40,4 @@ function createPromise(position, delay) {
     }, delay);
   });
   
-}
-
-function callPromiseCreation({ amount, step, delay }) {
-  let calculatedDelay = delay;
-  for (let index = 1; index <= amount; index += 1) {
-    createPromise(index, calculatedDelay)
-      .then(({ position, delay }) => {
-        Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`);
-      })
-      .catch(({ position, delay }) => {
-        Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`);
-      });
-    calculatedDelay += step; 
-  };
 }
